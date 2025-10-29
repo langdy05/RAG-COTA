@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COTA AI for Cambodia Tourism</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-blue: #1e40af;
+        --primary-yellow: #ffb6c1;
+        --accent-blue: #3b82f6;
+        --dark-bg: #111827;
+        --light-bg: #f9fafb;
+        --text-dark: #111827;
+        --text-light: #6b7280;
+        --white: #ffffff;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--primary-blue) 0%,
+          #1e3a8a 100%
+        );
+        min-height: 100vh;
+      }
+
+      /* High contrast message bubbles */
+      .user-bubble {
+        background: linear-gradient(135deg, var(--primary-yellow), #ffc0cb);
+        color: var(--dark-bg);
+        margin-left: auto;
+        border-bottom-right-radius: 8px;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      }
+
+      .ai-bubble {
+        background: var(--white);
+        color: var(--text-dark);
+        border-bottom-left-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      }
+
+      .message-bubble {
+        padding: 16px 20px;
+        border-radius: 18px;
+        margin-bottom: 16px;
+        max-width: 80%;
+        line-height: 1.6;
+        animation: fadeInUp 0.3s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* High contrast markdown */
+      .markdown-content {
+        color: var(--text-dark);
+        line-height: 1.7;
+      }
+
+      .markdown-content h1 {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
+        font-weight: 700;
+        border-bottom: 2px solid var(--primary-yellow);
+        padding-bottom: 0.5rem;
+        margin: 1.5rem 0 1rem 0;
+      }
+
+      .markdown-content h2 {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 1.5rem 0 1rem 0;
+      }
+
+      .markdown-content h3 {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin: 1rem 0 0.5rem 0;
+      }
+
+      .markdown-content p {
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+      }
+
+      .markdown-content strong {
+        color: var(--primary-blue);
+        font-weight: 600;
+      }
+
+      .markdown-content ul,
+      .markdown-content ol {
+        margin: 1rem 0;
+        padding-left: 1.5rem;
+      }
+
+      .markdown-content li {
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+      }
+
+      .markdown-content blockquote {
+        background: #f3f4f6;
+        border-left: 4px solid var(--primary-yellow);
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        border-radius: 0 6px 6px 0;
+        color: var(--text-dark);
+        font-style: italic;
+      }
+
+      .markdown-content code {
+        background: #f3f4f6;
+        color: var(--primary-blue);
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+        font-family: "Monaco", monospace;
+      }
+
+      .markdown-content pre {
+        background: #1f2937;
+        color: #f9fafb;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 1rem 0;
+        border-left: 4px solid var(--primary-yellow);
+      }
+
+      .markdown-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        background: white;
+      }
+
+      .markdown-content th {
+        background: var(--primary-blue);
+        color: white;
+        padding: 0.75rem;
+      }
+
+      .markdown-content td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+        color: var(--text-dark);
+      }
+
+      .markdown-content a {
+        color: var(--accent-blue);
+        text-decoration: underline;
+      }
+
+      /* AI Avatar */
+      .ai-avatar {
+        background: linear-gradient(
+          135deg,
+          var(--primary-blue),
+          var(--accent-blue)
+        );
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+
+      /* Input styling */
+      .input-container {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 24px;
+        transition: all 0.3s ease;
+      }
+
+      .input-container:focus-within {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      /* Chat container */
+      #chat-container {
+        background: #f9fafb;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-yellow) #e5e7eb;
+      }
+
+      #chat-container::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      #chat-container::-webkit-scrollbar-thumb {
+        background: var(--primary-yellow);
+        border-radius: 3px;
+      }
+
+      /* Header */
+      .header-gradient {
+        background: linear-gradient(
+          135deg,
+          var(--dark-bg),
+          var(--primary-blue)
+        );
+      }
+
+      @media (max-width: 768px) {
+        .message-bubble {
+          max-width: 95%;
+        }
+        .markdown-content {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body class="p-4">
+    <div
+      class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden"
+    >
+      <!-- Header -->
+      <div class="header-gradient text-white p-6">
+        <div class="flex items-center space-x-4">
+          <div class="ai-avatar">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">COTA AI</h1>
+            <p class="text-blue-200">Your Place for Tourist information</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Container -->
+      <div id="chat-container" class="h-96 md:h-[60vh] overflow-y-auto p-6">
+        <!-- Welcome message -->
+        <div class="text-center py-12 text-gray-600">
+          <div class="ai-avatar mx-auto mb-4">
+            <i class="fas fa-robot"></i>
+          </div>
+          <p class="text-lg font-semibold mb-2">Welcome to COTA AI!</p>
+          <p>Ask me about Cambodian Tourism, Tours plan</p>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="p-6 border-t bg-white">
+        <div class="input-container flex items-center space-x-3 px-4 py-3">
+          <i class="fas fa-comment-dots text-gray-400"></i>
+          <textarea
+            id="user-input"
+            rows="1"
+            class="flex-1 resize-none border-none bg-transparent focus:outline-none text-gray-800"
+            placeholder="Ask about Cambodian laws..."
+            onkeydown="handleKeyPress(event)"
+          ></textarea>
+          <button
+            onclick="sendMessage()"
+            id="send-btn"
+            class="bg-primary-blue hover:bg-blue-700 text-white p-3 rounded-full transition-colors"
+          >
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize marked.js
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+      });
+
+      // Global variables
+      const chatContainer = document.getElementById("chat-container");
+      const userInput = document.getElementById("user-input");
+      const sendBtn = document.getElementById("send-btn");
+      const apiUrl = "https://rag-cota.onrender.com//ask";
+      let conversationHistory = [];
+      const MAX_HISTORY_TURNS = 3;
+
+      // Auto-resize textarea
+      userInput.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 100) + "px";
+        sendBtn.disabled = this.value.trim() === "";
+      });
+
+      // Handle Enter key
+      function handleKeyPress(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      }
+
+      // Escape HTML for user input
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Append message with proper formatting
+      function appendMessage(content, className, isMarkdown = false) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `flex ${
+          className === "user-message"
+            ? "justify-end mb-4"
+            : "justify-start mb-4"
+        }`;
+
+        if (className === "user-message") {
+          messageDiv.innerHTML = `
+                    <div class="message-bubble user-bubble">
+                        <div class="markdown-content">${escapeHtml(
+                          content
+                        )}</div>
+                    </div>
+                `;
+        } else {
+          const renderedContent = marked.parse(content);
+          messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-3 max-w-[90%]">
+                        <div class="ai-avatar mt-2">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="message-bubble ai-bubble">
+                            <div class="markdown-content">${renderedContent}</div>
+                        </div>
+                    </div>
+                `;
+        }
+
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        // Remove welcome message
+        const welcome = chatContainer.querySelector(".text-center");
+        if (welcome) welcome.remove();
+      }
+
+      // Fetch with timeout
+      async function fetchWithTimeout(url, options, timeout = 15000) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        try {
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+          });
+          clearTimeout(id);
+          return response;
+        } catch (error) {
+          clearTimeout(id);
+          throw error;
+        }
+      }
+
+      // Main send message function - FULLY FUNCTIONAL
+      async function sendMessage() {
+        const question = userInput.value.trim();
+        if (!question) return;
+
+        // Add user message
+        appendMessage(question, "user-message");
+        const originalValue = userInput.value;
+        userInput.value = "";
+        userInput.style.height = "auto";
+
+        // Loading state
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        const historyToSend = conversationHistory.slice(-MAX_HISTORY_TURNS * 2);
+
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (attempts < maxAttempts) {
+          try {
+            const response = await fetchWithTimeout(apiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                question: question,
+                history: historyToSend,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error(
+                `HTTP ${response.status}: ${await response.text()}`
+              );
+            }
+
+            const data = await response.json();
+            appendMessage(data.answer, "ai-message", true);
+
+            // Update history
+            conversationHistory.push({
+              role: "user",
+              parts: [{ text: question }],
+            });
+            conversationHistory.push({
+              role: "model",
+              parts: [{ text: data.answer }],
+            });
+
+            break;
+          } catch (error) {
+            attempts++;
+            if (attempts === maxAttempts) {
+              appendMessage(
+                `❌ **Error**: Failed to connect to server after ${maxAttempts} attempts. Please try again.`,
+                "ai-message",
+                true
+              );
+            } else {
+              await new Promise((resolve) =>
+                setTimeout(resolve, 1000 * attempts)
+              );
+            }
+          }
+        }
+
+        // Reset button
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      // Initialize
+      userInput.focus();
+    </script>
+  </body>
+</html>

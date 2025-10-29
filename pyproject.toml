@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "ai-document-service"
+version = "0.1.0"
+description = "A memory-efficient RAG server for Cambodian Law"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^3.0.0"
+gunicorn = "^22.0.0"
+google-cloud-aiplatform = "^1.56.0"
+pypdf = "^4.0.0"
+flask-cors = "^4.0.1"  # Added for CORS support
+google-generativeai = "^0.7.2"
+chromadb = "^0.5.3"
+langdetect = "^1.0.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
